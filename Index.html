@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Praxis Data — Ventas & IA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style> body { font-family: 'PT Sans', sans-serif; } </style>
+</head>
+<body class="bg-[#F4F0EF] text-[#2A3D75] min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="bg-[#2A3D75] text-[#F4F0EF] px-6 py-4 flex flex-col md:flex-row justify-between items-center shadow-md gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-wide">Praxis <span class="text-[#D48D7C]">Data</span></h1>
+      <p class="text-xs opacity-70">Módulo de Ventas & IA (Demo)</p>
+    </div>
+    
+    <div class="flex gap-2">
+      <input type="date" id="inputDesde" class="bg-white/10 px-2 py-1 rounded text-white text-sm focus:outline-none">
+      <input type="date" id="inputHasta" class="bg-white/10 px-2 py-1 rounded text-white text-sm focus:outline-none">
+      
+      <button id="btnRefrescar" onclick="cargarDashboard()" class="bg-[#D48D7C] hover:bg-white hover:text-[#2A3D75] px-3 py-1 rounded text-white text-sm font-bold transition flex items-center justify-center min-w-[90px]">
+        <svg id="spinRefrescar" class="animate-spin -ml-1 mr-2 h-4 w-4 text-current hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span id="txtBtnRefrescar">Refrescar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- INPUT IA CON MICRÓFONO LIBRE -->
+  <div class="p-6 max-w-3xl mx-auto w-full mt-4">
+    <div class="bg-white p-6 rounded-3xl shadow-lg border border-[#2A3D75]/10 flex flex-col items-center">
+      <h2 class="text-lg font-bold text-[#2A3D75] mb-4">Ingresar Nueva Venta</h2>
+      <div class="w-full flex items-center gap-3 bg-[#F4F0EF] p-3 rounded-2xl border border-[#2A3D75]/20">
+        
+        <button id="btnMic" onclick="iniciarMicrofono()" class="p-3 bg-[#D48D7C] text-white rounded-full shadow hover:scale-105 transition shrink-0" title="Dictar por voz">🎙️</button>
+        
+        <textarea id="txtInput" rows="1" class="w-full bg-transparent border-none focus:ring-0 text-[#2A3D75] text-sm resize-none outline-none py-2 px-3" placeholder="Toca el micrófono o escribe... Ej: 2 sancochos por 36 mil"></textarea>
+        
+        <button id="btnProcesar" onclick="mandarA_IA()" class="p-3 bg-[#2A3D75] text-white rounded-xl shadow font-bold hover:bg-[#1f2d57] transition shrink-0 flex items-center justify-center min-w-[140px]">
+          <svg id="spinProcesar" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="txtBtnProcesar">Procesar IA</span>
+        </button>
+      </div>
+      <p id="msgEstado" class="text-xs text-[#D48D7C] font-bold mt-2 h-4 text-center w-full"></p>
+    </div>
+  </div>
+
+  <!-- TARJETA MODAL -->
+  <div id="modalConfirmacion" class="fixed inset-0 bg-[#2A3D75]/80 z-50 flex items-center justify-center hidden px-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform">
+      <div class="text-center mb-6">
+        <span class="text-xs font-bold uppercase text-[#D48D7C] tracking-wider">Verificación Rápida</span>
+        <h3 class="text-2xl font-bold text-[#2A3D75] mt-1">¿Guardar venta?</h3>
+      </div>
+      <div class="bg-[#F4F0EF] p-4 rounded-xl space-y-3 text-sm text-[#2A3D75] mb-6">
+        <div class="flex justify-between border-b border-[#2A3D75]/10 pb-1"><span class="opacity-60">Producto:</span><strong id="prevProd" class="text-right">--</strong></div>
+        <div class="flex justify-between border-b border-[#2A3D75]/10 pb-1"><span class="opacity-60">Cantidad:</span><strong id="prevCant">--</strong></div>
+        <div class="flex justify-between font-bold text-[#D48D7C] text-lg pt-2"><span>Total:</span><span id="prevTotal">--</span></div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="cerrarModal()" class="w-full py-3 rounded-xl border-2 border-[#2A3D75] text-[#2A3D75] font-bold">Cancelar</button>
+        <button onclick="guardarDefinitivo()" id="btnGuardar" class="w-full py-3 rounded-xl bg-[#2A3D75] text-white font-bold flex items-center justify-center">
+          <svg id="spinGuardar" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="txtBtnGuardar">Confirmar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <main class="flex-grow p-6 max-w-[1400px] mx-auto w-full flex flex-col gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-3xl shadow flex flex-col justify-center items-center text-center">
+        <p class="text-xs uppercase font-bold text-[#2A3D75]/50 mb-2">Ingresos del Período</p>
+        <h3 id="dashIngresos" class="text-4xl font-bold text-[#2A3D75]">$0</h3>
+        <p class="text-sm text-[#2A3D75]/60 mt-4">Ticket Promedio: <strong id="dashTicket" class="text-[#D48D7C]">$0</strong></p>
+      </div>
+      <div class="bg-white p-6 rounded-3xl shadow flex flex-col items-center">
+        <h4 class="text-lg font-bold text-[#2A3D75] mb-2">Unidades Vendidas</h4>
+        <div class="relative w-full max-w-[200px] aspect-square flex-grow"><canvas id="graficoPastel"></canvas></div>
+      </div>
+      <div class="bg-white p-6 rounded-3xl shadow overflow-hidden">
+        <h4 class="text-lg font-bold text-[#2A3D75] mb-4">Top 5 Productos</h4>
+        <div class="overflow-x-auto"><table class="w-full text-left"><tbody id="tbodyTop" class="text-sm divide-y"></tbody></table></div>
+      </div>
+    </div>
+    <div class="bg-white p-6 rounded-3xl shadow w-full">
+      <h4 class="text-lg font-bold text-[#2A3D75] mb-4">Tendencia de Ingresos por Hora</h4>
+      <div class="relative w-full h-[250px]"><canvas id="graficoTendencia"></canvas></div>
+    </div>
+  </main>
+
+  <script>
+    // ⚠️ CAMBIA ESTA URL POR TU /exec REAL DE APPS SCRIPT
+    const API_URL = "https://script.google.com/macros/s/AKfycbwTt7vSurXtVOhmXFE3FFsPs4oE7ox6PAfMLgoMHcAqUv78yT25d2Eu3gXKVEp-EXsp/exec";
+
+    var datosTemporales = null;
+    var miGrafico = null;
+    var miGraficoTend = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var hoy = new Date();
+      document.getElementById('inputHasta').value = hoy.toISOString().split('T')[0];
+      document.getElementById('inputDesde').value = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split('T')[0];
+      cargarDashboard();
+    });
+
+    function formatearMoneda(val) { return '$' + Math.round(val).toLocaleString('es-CO'); }
+
+    async function llamarAPI(payload) {
+      try {
+        let response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+        return await response.json();
+      } catch (err) {
+        return { exito: false, mensaje: "Error de conexión con el servidor" };
+      }
+    }
+
+    async function cargarDashboard() {
+      var desde = document.getElementById('inputDesde').value;
+      var hasta = document.getElementById('inputHasta').value;
+      
+      var btnRefrescar = document.getElementById('btnRefrescar');
+      var spin = document.getElementById('spinRefrescar');
+      var txt = document.getElementById('txtBtnRefrescar');
+      
+      btnRefrescar.disabled = true; spin.classList.remove('hidden'); txt.textContent = '...';
+
+      let res = await llamarAPI({ action: "dashboard", desde: desde, hasta: hasta });
+
+      btnRefrescar.disabled = false; spin.classList.add('hidden'); txt.textContent = 'Refrescar';
+      if (!res.exito && res.ingresos === undefined) return;
+
+      document.getElementById('dashIngresos').textContent = formatearMoneda(res.ingresos);
+      document.getElementById('dashTicket').textContent = formatearMoneda(res.ticketPromedio);
+
+      var tbody = document.getElementById('tbodyTop');
+      tbody.innerHTML = '';
+      var labels = [], datos = [];
+
+      res.topProductos.forEach(p => {
+        tbody.innerHTML += `<tr><td class="py-3 font-bold text-[#2A3D75]">${p.producto}</td><td class="py-3">${p.unidades}</td><td class="py-3 text-right font-bold text-[#D48D7C]">${formatearMoneda(p.facturacion)}</td></tr>`;
+        labels.push(p.producto);
+        datos.push(p.unidades);
+      });
+
+      if (miGrafico) miGrafico.destroy();
+      miGrafico = new Chart(document.getElementById('graficoPastel').getContext('2d'), {
+        type: 'pie',
+        data: { labels: labels, datasets: [{ data: datos, backgroundColor: ['#2A3D75', '#D48D7C', '#8A99B8', '#E6C1B5', '#1a2750'], borderWidth: 1, borderColor: '#ffffff' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      var labelsHora = [], datosHora = [];
+      res.ventasPorHora.forEach(h => { labelsHora.push(h.hora); datosHora.push(h.total); });
+
+      if (miGraficoTend) miGraficoTend.destroy();
+      miGraficoTend = new Chart(document.getElementById('graficoTendencia').getContext('2d'), {
+        type: 'line',
+        data: { labels: labelsHora, datasets: [{ label: 'Ingresos', data: datosHora, fill: true, backgroundColor: 'rgba(212, 141, 124, 0.2)', borderColor: '#D48D7C', pointBackgroundColor: '#2A3D75', tension: 0.4 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return formatearMoneda(value); } } } }, plugins: { legend: { display: false } } }
+      });
+    }
+
+    function iniciarMicrofono() {
+      var btnMic = document.getElementById('btnMic');
+      var input = document.getElementById('txtInput');
+      var msj = document.getElementById('msgEstado');
+      
+      var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) { msj.textContent = 'Tu navegador no soporta voz.'; return; }
+      
+      var recognition = new SpeechRecognition();
+      recognition.lang = 'es-CO';
+      recognition.onstart = function() { input.value = ''; btnMic.style.backgroundColor = '#ef4444'; msj.textContent = '🎙️ Escuchando...'; };
+      recognition.onresult = function(event) { input.value = event.results[0][0].transcript; };
+      recognition.onend = function() {
+        btnMic.style.backgroundColor = '#D48D7C'; msj.textContent = '';
+        if(input.value.trim().length > 0) mandarA_IA();
+      };
+      recognition.start();
+    }
+
+    async function mandarA_IA() {
+      var texto = document.getElementById('txtInput').value.trim();
+      var btn = document.getElementById('btnProcesar');
+      var txt = document.getElementById('txtBtnProcesar');
+      var spin = document.getElementById('spinProcesar');
+      var msj = document.getElementById('msgEstado');
+      
+      if (!texto) { msj.textContent = 'Escribe o dicta algo.'; return; }
+
+      msj.textContent = 'Procesando...'; btn.disabled = true; spin.classList.remove('hidden'); txt.textContent = 'Analizando...';
+      let res = await llamarAPI({ action: "analizar", texto: texto });
+      btn.disabled = false; spin.classList.add('hidden'); txt.textContent = 'Procesar IA';
+
+      if (res.exito) {
+        msj.textContent = '';
+        datosTemporales = res.datos_mapeados;
+        document.getElementById('prevProd').textContent = datosTemporales.producto;
+        document.getElementById('prevCant').textContent = datosTemporales.cantidad;
+        document.getElementById('prevTotal').textContent = formatearMoneda(datosTemporales.total);
+        document.getElementById('modalConfirmacion').classList.remove('hidden');
+      } else {
+        msj.textContent = 'Error: ' + res.mensaje;
+      }
+    }
+
+    function cerrarModal() { document.getElementById('modalConfirmacion').classList.add('hidden'); }
+
+    async function guardarDefinitivo() {
+      var btn = document.getElementById('btnGuardar');
+      var txt = document.getElementById('txtBtnGuardar');
+      var spin = document.getElementById('spinGuardar');
+      
+      btn.disabled = true; spin.classList.remove('hidden'); txt.textContent = 'Guardando...';
+      let res = await llamarAPI({ action: "guardar", datos: datosTemporales });
+      btn.disabled = false; spin.classList.add('hidden'); txt.textContent = 'Confirmar';
+
+      if (res.exito) {
+        cerrarModal(); document.getElementById('txtInput').value = '';
+        document.getElementById('msgEstado').textContent = '✅ Venta guardada con éxito.';
+        setTimeout(function(){ document.getElementById('msgEstado').textContent = ''; }, 3000);
+        cargarDashboard();
+      } else {
+        document.getElementById('msgEstado').textContent = 'Error al guardar.'; cerrarModal();
+      }
+    }
+  </script>
+</body>
+</html>
