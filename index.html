@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Praxis Data — Ventas & IA</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Importamos Chart.js y el Plugin de Etiquetas (DataLabels) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
   <style> body { font-family: 'PT Sans', sans-serif; } </style>
 </head>
@@ -40,7 +42,7 @@
         
         <button id="btnMic" onclick="iniciarMicrofono()" class="p-3 bg-[#D48D7C] text-white rounded-full shadow hover:scale-105 transition shrink-0" title="Dictar por voz">🎙️</button>
         
-        <textarea id="txtInput" rows="1" class="w-full bg-transparent border-none focus:ring-0 text-[#2A3D75] text-sm resize-none outline-none py-2 px-3" placeholder="Toca el micrófono o escribe... Ej: 2 sancochos por 36 mil"></textarea>
+        <textarea id="txtInput" rows="1" class="w-full bg-transparent border-none focus:ring-0 text-[#2A3D75] text-sm resize-none outline-none py-2 px-3" placeholder="Toca el micrófono o escribe... Ej: 2 sancochos"></textarea>
         
         <button id="btnProcesar" onclick="mandarA_IA()" class="p-3 bg-[#2A3D75] text-white rounded-xl shadow font-bold hover:bg-[#1f2d57] transition shrink-0 flex items-center justify-center min-w-[140px]">
           <svg id="spinProcesar" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -87,10 +89,15 @@
         <h3 id="dashIngresos" class="text-4xl font-bold text-[#2A3D75]">$0</h3>
         <p class="text-sm text-[#2A3D75]/60 mt-4">Ticket Promedio: <strong id="dashTicket" class="text-[#D48D7C]">$0</strong></p>
       </div>
+      
+      <!-- CONTENEDOR DEL PASTEL MÁS AMPLIO -->
       <div class="bg-white p-6 rounded-3xl shadow flex flex-col items-center">
         <h4 class="text-lg font-bold text-[#2A3D75] mb-2">Unidades Vendidas</h4>
-        <div class="relative w-full max-w-[200px] aspect-square flex-grow"><canvas id="graficoPastel"></canvas></div>
+        <div class="relative w-full h-[250px] flex-grow flex items-center justify-center">
+          <canvas id="graficoPastel"></canvas>
+        </div>
       </div>
+
       <div class="bg-white p-6 rounded-3xl shadow overflow-hidden">
         <h4 class="text-lg font-bold text-[#2A3D75] mb-4">Top 5 Productos</h4>
         <div class="overflow-x-auto"><table class="w-full text-left"><tbody id="tbodyTop" class="text-sm divide-y"></tbody></table></div>
@@ -105,6 +112,9 @@
   <script>
     // ⚠️ CAMBIA ESTA URL POR TU /exec REAL DE APPS SCRIPT
     const API_URL = "https://script.google.com/macros/s/AKfycbwvUkLqqbDEnDiBMpAAc4sbjWkXS8P-KCP_nHYbzaW_CaeXJPqQoP8p1jktYanpXszv/exec";
+
+    // Activamos el plugin de las etiquetas sobre el pastel
+    Chart.register(ChartDataLabels);
 
     var datosTemporales = null;
     var miGrafico = null;
@@ -157,10 +167,41 @@
       });
 
       if (miGrafico) miGrafico.destroy();
+      
+      // NUEVA CONFIGURACIÓN DEL GRÁFICO DE PASTEL CON PORCENTAJES Y LEYENDA A LA DERECHA
       miGrafico = new Chart(document.getElementById('graficoPastel').getContext('2d'), {
         type: 'pie',
-        data: { labels: labels, datasets: [{ data: datos, backgroundColor: ['#2A3D75', '#D48D7C', '#8A99B8', '#E6C1B5', '#1a2750'], borderWidth: 1, borderColor: '#ffffff' }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        data: { 
+          labels: labels, 
+          datasets: [{ 
+            data: datos, 
+            backgroundColor: ['#2A3D75', '#D48D7C', '#8A99B8', '#E6C1B5', '#1a2750'], 
+            borderWidth: 2, 
+            borderColor: '#ffffff' 
+          }] 
+        },
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          layout: { padding: 10 },
+          plugins: { 
+            legend: { 
+              position: 'right', // Mueve la lista de colores a la derecha
+              labels: { boxWidth: 12, font: { size: 11 } }
+            },
+            datalabels: {
+              color: '#ffffff', // Color del porcentaje
+              font: { weight: 'bold', size: 12 },
+              formatter: function(value, context) {
+                // Calcula el porcentaje exacto
+                let total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                let porcentaje = Math.round((value / total) * 100);
+                // Si la tajada es muy pequeña (< 4%), oculta el texto para que no se vea amontonado
+                return porcentaje > 4 ? porcentaje + '%' : ''; 
+              }
+            }
+          } 
+        }
       });
 
       var labelsHora = [], datosHora = [];
@@ -170,7 +211,15 @@
       miGraficoTend = new Chart(document.getElementById('graficoTendencia').getContext('2d'), {
         type: 'line',
         data: { labels: labelsHora, datasets: [{ label: 'Ingresos', data: datosHora, fill: true, backgroundColor: 'rgba(212, 141, 124, 0.2)', borderColor: '#D48D7C', pointBackgroundColor: '#2A3D75', tension: 0.4 }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return formatearMoneda(value); } } } }, plugins: { legend: { display: false } } }
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return formatearMoneda(value); } } } }, 
+          plugins: { 
+            legend: { display: false },
+            datalabels: { display: false } // Apagamos las etiquetas en la línea de tendencia para no ensuciarla
+          } 
+        }
       });
     }
 
