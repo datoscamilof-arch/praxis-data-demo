@@ -4,35 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Praxis Data — Ventas & IA</title>
-  
-  <!-- Tailwind CSS para el diseño -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Chart.js para las gráficas -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <!-- Plugin de Chart.js para los porcentajes en el pastel -->
+  <!-- Plugin para Porcentajes en Gráfico de Pastel -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  
-  <!-- Fuente tipográfica -->
   <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
   <style> body { font-family: 'PT Sans', sans-serif; } </style>
 </head>
 <body class="bg-[#F4F0EF] text-[#2A3D75] min-h-screen flex flex-col">
 
-  <!-- ==========================================
-       HEADER RESPONSIVO
-  =========================================== -->
+  <!-- HEADER RESPONSIVO -->
   <header class="bg-[#2A3D75] text-[#F4F0EF] px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center shadow-md gap-4">
     <div>
       <h1 class="text-2xl font-bold tracking-wide text-center sm:text-left">Praxis <span class="text-[#D48D7C]">Data</span></h1>
-      <p class="text-xs opacity-70 text-center sm:text-left">Módulo de Ventas & IA (Mesas)</p>
+      <p class="text-xs opacity-70 text-center sm:text-left">Módulo de Ventas & IA</p>
     </div>
     
     <div class="flex flex-wrap justify-center gap-2 w-full sm:w-auto">
       <input type="date" id="inputDesde" class="bg-white/10 px-2 py-1 rounded text-white text-sm focus:outline-none">
       <input type="date" id="inputHasta" class="bg-white/10 px-2 py-1 rounded text-white text-sm focus:outline-none">
-      
       <button id="btnRefrescar" onclick="cargarDashboard()" class="bg-[#D48D7C] hover:bg-white hover:text-[#2A3D75] px-3 py-1 rounded text-white text-sm font-bold transition flex items-center justify-center min-w-[100px]">
         <svg id="spinRefrescar" class="animate-spin -ml-1 mr-2 h-4 w-4 text-current hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -43,50 +34,41 @@
     </div>
   </header>
 
-  <!-- ==========================================
-       INPUT IA CON MICRÓFONO
-  =========================================== -->
+  <!-- INPUT IA RESPONSIVO -->
   <div class="p-4 sm:p-6 max-w-3xl mx-auto w-full mt-2">
     <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border border-[#2A3D75]/10 flex flex-col items-center">
-      <h2 class="text-base sm:text-lg font-bold text-[#2A3D75] mb-4">Ingresar Mesa / Orden Completa</h2>
-      
+      <h2 class="text-base sm:text-lg font-bold text-[#2A3D75] mb-4">Ingresar Nueva Venta</h2>
       <div class="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-[#F4F0EF] p-3 rounded-2xl border border-[#2A3D75]/20">
+        
         <div class="flex items-center gap-2 w-full sm:w-auto">
-          <button id="btnMic" onclick="iniciarMicrofono()" class="p-3 bg-[#D48D7C] text-white rounded-full shadow hover:scale-105 transition shrink-0" title="Dictar orden">🎙️</button>
-          <textarea id="txtInput" rows="2" class="w-full sm:w-64 bg-transparent border-none focus:ring-0 text-[#2A3D75] text-sm resize-none outline-none py-1 px-2" placeholder="Ej: 2 sancochos y 1 jugo de lulo"></textarea>
+          <button id="btnMic" onclick="iniciarMicrofono()" class="p-3 bg-[#D48D7C] text-white rounded-full shadow hover:scale-105 transition shrink-0" title="Dictar por voz">🎙️</button>
+          <textarea id="txtInput" rows="2" class="w-full sm:w-64 bg-transparent border-none focus:ring-0 text-[#2A3D75] text-sm resize-none outline-none py-1 px-2" placeholder="Toca el micrófono o escribe... Ej: 2 sancochos"></textarea>
         </div>
         
-        <button id="btnProcesar" onclick="mandarA_IA()" class="p-3 bg-[#2A3D75] text-white rounded-xl shadow font-bold hover:bg-[#1f2d57] transition shrink-0 flex items-center justify-center min-w-[150px] w-full sm:w-auto">
+        <button id="btnProcesar" onclick="mandarA_IA()" class="p-3 bg-[#2A3D75] text-white rounded-xl shadow font-bold hover:bg-[#1f2d57] transition shrink-0 flex items-center justify-center min-w-[140px] w-full sm:w-auto">
           <svg id="spinProcesar" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span id="txtBtnProcesar">Procesar Orden</span>
+          <span id="txtBtnProcesar">Procesar IA</span>
         </button>
       </div>
       <p id="msgEstado" class="text-xs text-[#D48D7C] font-bold mt-2 h-4 text-center w-full"></p>
     </div>
   </div>
 
-  <!-- ==========================================
-       TARJETA MODAL (TICKET DE MESA)
-  =========================================== -->
+  <!-- TARJETA MODAL -->
   <div id="modalConfirmacion" class="fixed inset-0 bg-[#2A3D75]/80 z-50 flex items-center justify-center hidden px-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl transform">
-      <div class="text-center mb-4">
-        <span class="text-xs font-bold uppercase text-[#D48D7C] tracking-wider">Verificación de Ticket</span>
-        <h3 class="text-xl sm:text-2xl font-bold text-[#2A3D75] mt-1">¿Guardar orden?</h3>
+      <div class="text-center mb-6">
+        <span class="text-xs font-bold uppercase text-[#D48D7C] tracking-wider">Verificación Rápida</span>
+        <h3 class="text-xl sm:text-2xl font-bold text-[#2A3D75] mt-1">¿Guardar venta?</h3>
       </div>
-      
-      <!-- Contenedor dinámico donde aparecerá la lista de productos -->
-      <div id="listaProductosModal" class="bg-[#F4F0EF] p-4 rounded-xl space-y-2 text-sm text-[#2A3D75] mb-4 max-h-48 overflow-y-auto">
-        <!-- JS inyecta los items aquí -->
+      <div class="bg-[#F4F0EF] p-4 rounded-xl space-y-3 text-sm text-[#2A3D75] mb-6">
+        <div class="flex justify-between border-b border-[#2A3D75]/10 pb-1"><span class="opacity-60">Producto:</span><strong id="prevProd" class="text-right">--</strong></div>
+        <div class="flex justify-between border-b border-[#2A3D75]/10 pb-1"><span class="opacity-60">Cantidad:</span><strong id="prevCant">--</strong></div>
+        <div class="flex justify-between font-bold text-[#D48D7C] text-lg pt-2"><span>Total:</span><span id="prevTotal">--</span></div>
       </div>
-
-      <div class="flex justify-between font-bold text-[#D48D7C] text-xl mb-6 px-2">
-        <span>GRAN TOTAL:</span><span id="prevGranTotal">--</span>
-      </div>
-
       <div class="flex gap-3">
         <button onclick="cerrarModal()" class="w-full py-3 rounded-xl border-2 border-[#2A3D75] text-[#2A3D75] font-bold hover:bg-[#F4F0EF] transition">Cancelar</button>
         <button onclick="guardarDefinitivo()" id="btnGuardar" class="w-full py-3 rounded-xl bg-[#2A3D75] text-white font-bold hover:bg-[#1f2d57] transition shadow-lg flex items-center justify-center">
@@ -100,20 +82,16 @@
     </div>
   </div>
 
-  <!-- ==========================================
-       DASHBOARD DE MÉTRICAS
-  =========================================== -->
+  <!-- DASHBOARD PRINCIPAL -->
   <main class="flex-grow p-4 sm:p-6 max-w-[1400px] mx-auto w-full flex flex-col gap-6">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Ingresos y Ticket Promedio Real -->
       <div class="bg-white p-6 rounded-3xl shadow border border-[#2A3D75]/5 flex flex-col justify-center items-center text-center">
         <p class="text-xs uppercase font-bold text-[#2A3D75]/50 mb-2">Ingresos del Período</p>
         <h3 id="dashIngresos" class="text-3xl sm:text-4xl font-bold text-[#2A3D75]">$0</h3>
-        <p class="text-sm text-[#2A3D75]/60 mt-4">Ticket Promedio Real: <strong id="dashTicket" class="text-[#D48D7C]">$0</strong></p>
+        <p class="text-sm text-[#2A3D75]/60 mt-4">Ticket Promedio: <strong id="dashTicket" class="text-[#D48D7C]">$0</strong></p>
       </div>
       
-      <!-- Gráfico de Pastel -->
+      <!-- Gráfico adaptado para celular con proporciones controladas -->
       <div class="bg-white p-6 rounded-3xl shadow border border-[#2A3D75]/5 flex flex-col items-center">
         <h4 class="text-lg font-bold text-[#2A3D75] mb-2">Unidades Vendidas</h4>
         <div class="relative w-full max-w-[260px] h-[240px] flex items-center justify-center">
@@ -121,7 +99,6 @@
         </div>
       </div>
       
-      <!-- Top 5 Productos -->
       <div class="bg-white p-6 rounded-3xl shadow border border-[#2A3D75]/5 overflow-hidden">
         <h4 class="text-lg font-bold text-[#2A3D75] mb-4">Top 5 Productos</h4>
         <div class="overflow-x-auto">
@@ -136,8 +113,6 @@
         </div>
       </div>
     </div>
-    
-    <!-- Gráfico de Tendencia -->
     <div class="bg-white p-6 rounded-3xl shadow border border-[#2A3D75]/5 w-full">
       <h4 class="text-lg font-bold text-[#2A3D75] mb-4">Tendencia de Ingresos por Hora</h4>
       <div class="relative w-full h-[250px]">
@@ -146,18 +121,13 @@
     </div>
   </main>
 
-  <!-- ==========================================
-       LÓGICA JAVASCRIPT
-  =========================================== -->
   <script>
-    // ⚠️ REEMPLAZA ESTA URL CON TU URL REAL TERMINADA EN /exec
-    const API_URL = "https://script.google.com/macros/s/AKfycbwvUkLqqbDEnDiBMpAAc4sbjWkXS8P-KCP_nHYbzaW_CaeXJPqQoP8p1jktYanpXszv/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwTt7vSurXtVOhmXFE3FFsPs4oE7ox6PAfMLgoMHcAqUv78yT25d2Eu3gXKVEp-EXsp/exec";
 
-    var datosTemporales = []; // Ahora es un Array para soportar múltiples productos
+    var datosTemporales = null;
     var miGrafico = null;
     var miGraficoTend = null;
 
-    // Configurar fechas iniciales al cargar
     document.addEventListener('DOMContentLoaded', function() {
       var hoy = new Date();
       document.getElementById('inputHasta').value = hoy.toISOString().split('T')[0];
@@ -165,25 +135,17 @@
       cargarDashboard();
     });
 
-    function formatearMoneda(val) { 
-      return '$' + Math.round(val).toLocaleString('es-CO'); 
-    }
+    function formatearMoneda(val) { return '$' + Math.round(val).toLocaleString('es-CO'); }
 
-    // Función principal para comunicarse con Google Apps Script
     async function llamarAPI(payload) {
       try {
-        let response = await fetch(API_URL, { 
-          method: "POST", 
-          body: JSON.stringify(payload) 
-        });
+        let response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
         return await response.json();
       } catch (err) {
-        console.error("Error de red:", err);
         return { exito: false, mensaje: "Error de conexión con el servidor" };
       }
     }
 
-    // Refrescar los gráficos
     async function cargarDashboard() {
       var desde = document.getElementById('inputDesde').value;
       var hasta = document.getElementById('inputHasta').value;
@@ -192,218 +154,149 @@
       var spin = document.getElementById('spinRefrescar');
       var txt = document.getElementById('txtBtnRefrescar');
       
-      // Animación de carga
-      btnRefrescar.disabled = true; 
-      spin.classList.remove('hidden'); 
-      txt.textContent = '...';
+      btnRefrescar.disabled = true; spin.classList.remove('hidden'); txt.textContent = '...';
 
       let res = await llamarAPI({ action: "dashboard", desde: desde, hasta: hasta });
 
-      // Fin de animación
-      btnRefrescar.disabled = false; 
-      spin.classList.add('hidden'); 
-      txt.textContent = 'Refrescar';
-      
+      btnRefrescar.disabled = false; spin.classList.add('hidden'); txt.textContent = 'Refrescar';
       if (!res.exito && res.ingresos === undefined) return;
 
       document.getElementById('dashIngresos').textContent = formatearMoneda(res.ingresos);
       document.getElementById('dashTicket').textContent = formatearMoneda(res.ticketPromedio);
 
-      // Tabla Top 5
-      var tbody = document.getElementById('tbodyTop'); 
+      var tbody = document.getElementById('tbodyTop');
       tbody.innerHTML = '';
-      var labelsPastel = [], datosPastel = [];
+      var labels = [], datos = [];
 
       res.topProductos.forEach(p => {
-        tbody.innerHTML += `
-          <tr>
-            <td class="py-3 font-bold text-[#2A3D75]">${p.producto}</td>
-            <td class="py-3">${p.unidades}</td>
-            <td class="py-3 text-right font-bold text-[#D48D7C]">${formatearMoneda(p.facturacion)}</td>
-          </tr>`;
-        labelsPastel.push(p.producto); 
-        datosPastel.push(p.unidades);
+        tbody.innerHTML += `<tr><td class="py-3 font-bold text-[#2A3D75]">${p.producto}</td><td class="py-3">${p.unidades}</td><td class="py-3 text-right font-bold text-[#D48D7C]">${formatearMoneda(p.facturacion)}</td></tr>`;
+        labels.push(p.producto);
+        datos.push(p.unidades);
       });
 
-      // Gráfico de Pastel con Porcentajes
+      // Gráfico con porcentajes gracias a datalabels
       if (miGrafico) miGrafico.destroy();
       miGrafico = new Chart(document.getElementById('graficoPastel').getContext('2d'), {
-        type: 'pie', 
+        type: 'pie',
         data: { 
-          labels: labelsPastel, 
-          datasets: [{ 
-            data: datosPastel, 
-            backgroundColor: ['#2A3D75', '#D48D7C', '#8A99B8', '#E6C1B5', '#1a2750'], 
-            borderWidth: 1, 
-            borderColor: '#ffffff' 
-          }] 
+            labels: labels, 
+            datasets: [{ data: datos, backgroundColor: ['#2A3D75', '#D48D7C', '#8A99B8', '#E6C1B5', '#1a2750'], borderWidth: 1, borderColor: '#ffffff' }] 
         },
         options: { 
-          responsive: true, 
-          maintainAspectRatio: false, 
-          plugins: { 
-            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-            datalabels: { 
-              color: '#ffffff', 
-              font: { weight: 'bold', size: 12 }, 
-              formatter: (value, ctx) => { 
-                let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0); 
-                let p = (sum > 0 ? (value * 100 / sum).toFixed(0) : 0) + "%"; 
-                return p === "0%" ? "" : p; 
-              } 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                datalabels: {
+                    color: '#ffffff',
+                    font: { weight: 'bold', size: 12 },
+                    formatter: (value, ctx) => {
+                        let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        let percentage = (sum > 0 ? (value * 100 / sum).toFixed(0) : 0) + "%";
+                        return percentage === "0%" ? "" : percentage;
+                    }
+                }
             } 
-          } 
-        }, 
+        },
         plugins: [ChartDataLabels]
       });
 
-      // Gráfico de Tendencia
-      var labelsHora = [], datosHora = []; 
-      res.ventasPorHora.forEach(h => { 
-        labelsHora.push(h.hora); 
-        datosHora.push(h.total); 
-      });
+      var labelsHora = [], datosHora = [];
+      res.ventasPorHora.forEach(h => { labelsHora.push(h.hora); datosHora.push(h.total); });
 
       if (miGraficoTend) miGraficoTend.destroy();
       miGraficoTend = new Chart(document.getElementById('graficoTendencia').getContext('2d'), {
-        type: 'line', 
-        data: { 
-          labels: labelsHora, 
-          datasets: [{ 
-            label: 'Ingresos', 
-            data: datosHora, 
-            fill: true, 
-            backgroundColor: 'rgba(212, 141, 124, 0.2)', 
-            borderColor: '#D48D7C', 
-            pointBackgroundColor: '#2A3D75',
-            tension: 0.4 
-          }] 
-        },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false, 
-          scales: { y: { beginAtZero: true, ticks: { callback: v => formatearMoneda(v) } } }, 
-          plugins: { legend: { display: false } } 
-        }
+        type: 'line',
+        data: { labels: labelsHora, datasets: [{ label: 'Ingresos', data: datosHora, fill: true, backgroundColor: 'rgba(212, 141, 124, 0.2)', borderColor: '#D48D7C', pointBackgroundColor: '#2A3D75', tension: 0.4 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return formatearMoneda(value); } } } }, plugins: { legend: { display: false } } }
       });
     }
 
-    // Encender el Micrófono del dispositivo
     function iniciarMicrofono() {
       var btnMic = document.getElementById('btnMic');
-      var txtInput = document.getElementById('txtInput');
+      var input = document.getElementById('txtInput');
       var msj = document.getElementById('msgEstado');
-
-      var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        alert('Tu navegador no soporta dictado por voz.');
-        return;
-      }
       
-      var recognition = new SpeechRecognition(); 
+      var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) { msj.textContent = 'Tu navegador no soporta voz.'; return; }
+      
+      var recognition = new SpeechRecognition();
       recognition.lang = 'es-CO';
       
       recognition.onstart = function() { 
-        txtInput.value = ''; 
-        btnMic.style.backgroundColor = '#ef4444'; 
-        msj.textContent = '🎙️ Escuchando...';
+          input.value = ''; 
+          btnMic.style.backgroundColor = '#ef4444'; 
+          msj.textContent = '🎙️ Escuchando...'; 
       };
-      
-      recognition.onresult = function(e) { 
-        txtInput.value = e.results[0][0].transcript; 
-      };
-      
-      recognition.onend = function() { 
+      recognition.onresult = function(event) { input.value = event.results[0][0].transcript; };
+      recognition.onend = function() {
         btnMic.style.backgroundColor = '#D48D7C'; 
         msj.textContent = '';
-        if(txtInput.value.trim().length > 0) {
-          mandarA_IA(); // Procesa automáticamente al terminar de hablar
-        }
+        if(input.value.trim().length > 0) mandarA_IA();
       };
-      
       recognition.start();
     }
 
-    // Enviar el texto para ser analizado
     async function mandarA_IA() {
       var texto = document.getElementById('txtInput').value.trim();
-      var msj = document.getElementById('msgEstado');
       var btn = document.getElementById('btnProcesar');
-      var txtBtn = document.getElementById('txtBtnProcesar');
+      var txt = document.getElementById('txtBtnProcesar');
       var spin = document.getElementById('spinProcesar');
+      var msj = document.getElementById('msgEstado');
+      
+      if (!texto) { msj.textContent = 'Escribe o dicta algo.'; return; }
 
-      if (!texto) return;
-
-      msj.textContent = 'Procesando orden completa...';
-      btn.disabled = true;
-      spin.classList.remove('hidden');
-      txtBtn.textContent = 'Analizando...';
+      msj.textContent = 'Procesando venta...'; 
+      btn.disabled = true; 
+      spin.classList.remove('hidden'); 
+      txt.textContent = 'Analizando...';
 
       let res = await llamarAPI({ action: "analizar", texto: texto });
 
-      btn.disabled = false;
-      spin.classList.add('hidden');
-      txtBtn.textContent = 'Procesar Orden';
+      btn.disabled = false; 
+      spin.classList.add('hidden'); 
+      txt.textContent = 'Procesar IA';
 
       if (res.exito) {
         msj.textContent = '';
-        
-        // Aseguramos que siempre sea un Array (lista de productos)
-        datosTemporales = Array.isArray(res.datos_mapeados) ? res.datos_mapeados : [res.datos_mapeados];
-        
-        var listaHtml = '';
-        var granTotal = 0;
-        
-        // Construimos el recibo producto por producto
-        datosTemporales.forEach(item => {
-            listaHtml += `
-            <div class="flex justify-between border-b border-[#2A3D75]/10 pb-2 mb-2">
-                <span><strong>${item.cantidad}x</strong> ${item.producto}</span>
-                <strong class="text-[#2A3D75]">${formatearMoneda(item.total)}</strong>
-            </div>`;
-            granTotal += item.total;
-        });
-
-        document.getElementById('listaProductosModal').innerHTML = listaHtml;
-        document.getElementById('prevGranTotal').textContent = formatearMoneda(granTotal);
+        datosTemporales = res.datos_mapeados;
+        document.getElementById('prevProd').textContent = datosTemporales.producto;
+        document.getElementById('prevCant').textContent = datosTemporales.cantidad;
+        document.getElementById('prevTotal').textContent = formatearMoneda(datosTemporales.total);
         document.getElementById('modalConfirmacion').classList.remove('hidden');
       } else {
         msj.textContent = 'Error: ' + res.mensaje;
       }
     }
 
-    function cerrarModal() { 
-      document.getElementById('modalConfirmacion').classList.add('hidden'); 
-    }
+    function cerrarModal() { document.getElementById('modalConfirmacion').classList.add('hidden'); }
 
-    // Guardar la mesa completa
     async function guardarDefinitivo() {
       var btn = document.getElementById('btnGuardar');
-      var txtBtn = document.getElementById('txtBtnGuardar');
+      var txt = document.getElementById('txtBtnGuardar');
       var spin = document.getElementById('spinGuardar');
-
-      btn.disabled = true;
-      spin.classList.remove('hidden');
-      txtBtn.textContent = 'Guardando...';
+      
+      btn.disabled = true; 
+      spin.classList.remove('hidden'); 
+      txt.textContent = 'Guardando...';
       
       let res = await llamarAPI({ action: "guardar", datos: datosTemporales });
       
-      btn.disabled = false;
-      spin.classList.add('hidden');
-      txtBtn.textContent = 'Confirmar';
+      btn.disabled = false; 
+      spin.classList.add('hidden'); 
+      txt.textContent = 'Confirmar';
 
       if (res.exito) {
         cerrarModal(); 
         document.getElementById('txtInput').value = '';
-        document.getElementById('msgEstado').textContent = '✅ Orden de mesa guardada con éxito.';
-        setTimeout(() => { document.getElementById('msgEstado').textContent = ''; }, 3000);
+        document.getElementById('msgEstado').textContent = '✅ Venta guardada con éxito.';
+        setTimeout(function(){ document.getElementById('msgEstado').textContent = ''; }, 3000);
         cargarDashboard();
       } else {
-        document.getElementById('msgEstado').textContent = 'Error al guardar la orden.'; 
+        document.getElementById('msgEstado').textContent = 'Error al guardar.'; 
         cerrarModal();
       }
     }
   </script>
 </body>
-</html>
 </html>
